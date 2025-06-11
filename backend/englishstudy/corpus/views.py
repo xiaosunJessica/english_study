@@ -4,7 +4,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Lesson, Unit
-from .serializers import UnitSerializer, LessonSerializer
+from .serializers import UnitSerializer, LessonDetailSerializer
 
 class CorpusFullListView(APIView):
     def get(self, request):
@@ -20,23 +20,26 @@ class CorpusFullListView(APIView):
 class CorpusFullItemView(APIView):
     def get(self, request):
         # 获取参数
-        name = request.GET.get('name')
         book_id = request.GET.get('book_id')
         unit_id = request.GET.get('unit_id')
         lesson_id = request.GET.get('lesson_id')
 
-        # 找到对应的unit
-        try:
-            unit = Lesson.objects.get(name = name, unit_id = unit_id, lesson_id=lesson_id)
-        except Unit.DoesNotExist:
-            return Response({"e": "4004", "m": "未找到对应试卷"}, status=404)
-        # 找到该 Unit 下所有 Lesson
+        if not all([unit_id, lesson_id]):
+            return Response({"error": "Missing parameters"}, status=status.HTTP_400_BAD_REQUEST)
 
-        lessons = unit.lessons.all()
-        serializer = LessonSerializer(lessons, many=True)
+        # 找到对应的lesson
+        try:
+            lesson = Lesson.objects.get(
+                id=lesson_id,
+                unit__id=unit_id)
+        except Lesson.DoesNotExist:
+            return Response({"e": "4004", "m": "未找到对应试卷"}, status=404)
+        # 找到该 lesson 下所有 words
+
+        serializer = LessonDetailSerializer(lesson)
         return Response({
             "e": "9999",
             "m": "操作成功",
-            "title": f"{unit.book.name} {unit.name}",
+            "title": f"",
             "data": serializer.data
         })

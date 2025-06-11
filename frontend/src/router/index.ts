@@ -11,7 +11,7 @@ const routes = [
     component: Home
   },
   {
-    path: '/wordlist/:chapter/:paper',
+    path: '/wordlist/:unitId/:lessonId',
     name: 'WordList',
     component: WordList,
     props: true

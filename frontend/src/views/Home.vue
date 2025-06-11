@@ -5,7 +5,7 @@
         <div class="notebook-section">
           <div class="notebook-icon">📖</div>
           <span class="notebook-text">错词本</span>
-          <span class="notebook-count">{{ wrongWords }}</span>
+          <span class="notebook-count">{{ 0 }}</span>
         </div>
         <div class="share-section">
           <div class="share-icon">🔗</div>
@@ -68,7 +68,7 @@ const regex = /^(Chapter\s*\d+)\s*(.*)$/;
 const router = useRouter()
 const vocabularyStore = useVocabularyStore()
 
-const { chapters, wrongWords, setChapters } = vocabularyStore
+const { chapters, setChapters } = vocabularyStore
 const expandedChapters = ref<number[]>([])
 
 const toggleChapter = (chapterId: number) => {
@@ -87,16 +87,9 @@ const goToWordList = (chapterId: number, paperId: number) => {
 onMounted(async () => {
   try {
     const res = await getCorpusList()
-    console.log(res, '00000')
-    console.log(res.data?.filter((item: any) => item.style === '2').map((item: any) => ({
-      ...item,
-      title: item.name.match(regex)?.[1] || '',
-      subtitle: item.name.match(regex)?.[2] || '',
-    })), '00000')
     setChapters(res.data?.filter((item: any) => item.style === '2').map((item: any) => ({
       ...item,
-      title: item.name.match(regex)?.[1] || '',
-      subtitle: item.name.match(regex)?.[2] || '',
+      subtitle: item.intro,
       testPapers: item.list.map((paper: any) => ({
         ...paper,
         title: paper.name.match(regex)?.[1] || '',

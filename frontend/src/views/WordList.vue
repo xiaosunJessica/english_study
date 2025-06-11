@@ -3,19 +3,19 @@
     <header class="header">
       <button class="back-btn" @click="goBack">←</button>
       <button class="home-btn" @click="goHome">🏠</button>
-      <h1 class="title">{{ pageTitle }}</h1>
+      <h1 class="title">{{ vocabularyStore.testPaper?.name }}</h1>
     </header>
 
     <div class="tabs">
-      <button 
-        class="tab" 
+      <button
+        class="tab"
         :class="{ active: activeTab === 'all' }"
         @click="activeTab = 'all'"
       >
         全部({{ allWords.length }})
       </button>
-      <button 
-        class="tab" 
+      <button
+        class="tab"
         :class="{ active: activeTab === 'wrong' }"
         @click="activeTab = 'wrong'"
       >
@@ -24,18 +24,18 @@
     </div>
 
     <div class="word-container">
-      <div 
-        v-for="(word, index) in displayWords"
+      <div
+        v-for="(word, index) in displayWords.value"
         :key="word.id"
         class="word-item"
       >
         <div class="word-number">{{ index + 1 }}.</div>
         <div class="word-content">
-          <div class="word-english">{{ word.english }}</div>
-          <div class="word-chinese">{{ word.chinese }}</div>
+          <div class="word-english">{{ word.text }}</div>
+          <div class="word-chinese">{{ word.note }}</div>
         </div>
-        <div v-if="word.isWrong" class="wrong-indicator">
-          错过{{ word.wrongCount }}次
+        <div v-if="word.is_wrong" class="wrong-indicator">
+          错过{{ word.wrong_num }}次
         </div>
       </div>
     </div>
@@ -48,36 +48,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useVocabularyStore } from '../stores/vocabulary'
+import { getCorpusItem } from '../api/corpus'
 
 interface Props {
-  chapter: string
-  paper: string
+  unitId: string
+  lessonId: string
 }
 
 const props = defineProps<Props>()
 const router = useRouter()
 const vocabularyStore = useVocabularyStore()
+const { setTestPaper } = vocabularyStore
 
 const activeTab = ref<'all' | 'wrong'>('all')
 
-const chapterId = parseInt(props.chapter)
-const paperId = parseInt(props.paper)
+const unitId = parseInt(props.unitId)
+const lessonId = parseInt(props.lessonId)
 
-const testPaper = vocabularyStore.getTestPaper(chapterId, paperId)
-const chapter = vocabularyStore.getChapter(chapterId)
 
-const pageTitle = computed(() => {
-  return `${chapter?.title} ${testPaper?.name}`
-})
 
-const allWords = computed(() => testPaper?.words || [])
-const wrongWords = computed(() => allWords.value.filter(word => word.isWrong))
+const allWords = computed(() => vocabularyStore.testPaper?.list || [])
+const wrongWords = computed(() => allWords.value.filter(word => word.is_wrong))
 
 const displayWords = computed(() => {
-  return activeTab.value === 'all' ? allWords.value : wrongWords.value
+  return activeTab.value === 'all' ? allWords : wrongWords
 })
 
 const goBack = () => {
@@ -94,8 +91,19 @@ const startFromWord = () => {
 }
 
 const startStudy = () => {
-  router.push(`/study/${chapterId}/${paperId}`)
+  router.push(`/study/${unitId}/${lessonId}`)
 }
+
+onMounted(async () => {
+
+  const res = await getCorpusItem({
+    book_id: 0,
+    unit_id: unitId,
+    lesson_id: lessonId
+  })
+
+  setTestPaper(res.data)
+})
 </script>
 
 <style scoped>
