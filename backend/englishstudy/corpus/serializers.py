@@ -4,7 +4,7 @@
 # @File: serializers
 # @Project: backend
 from rest_framework import serializers
-from .models import Book, Unit, Lesson,  Word
+from .models import LessonTest, Unit, Lesson,  Word
 
 class WordSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,7 +14,7 @@ class WordSerializer(serializers.ModelSerializer):
             'word_id', 'error_num', 'lesson_id'
         ]
 
-class LessonSerializer(serializers.ModelSerializer):
+class LessonTestSerializer(serializers.ModelSerializer):
     words = WordSerializer(many=True, read_only=True)
     class Meta:
         model = Lesson
@@ -23,13 +23,13 @@ class LessonSerializer(serializers.ModelSerializer):
             'check_url', 'unit_id', 'is_selected', 'words'
         ]
 
+class LessonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lesson
+        fields = ['id','name', 'is_checked', 'extra', 'url', 'word_count', 'unit_id']
+
 class UnitSerializer(serializers.ModelSerializer):
+    list = LessonSerializer(source='lessons', many=True, read_only=True)
     class Meta:
         model = Unit
-        fields = ['id','name', 'is_checked', 'extra', 'url', 'word_count', 'book_id']
-
-class BookSerializer(serializers.ModelSerializer):
-    list = UnitSerializer(source='units', many=True, read_only=True)
-    class Meta:
-        model = Book
         fields = ['id','name', 'style', 'is_selected', 'list']
