@@ -8,22 +8,17 @@
           <button class="toggle-btn">巩固错词</button>
         </div>
       </div>
+      <Countdown :seconds="countdown.timeLeft" :is-active="countdown.isActive" />
     </header>
 
     <div class="practice-area">
       <div class="word-display">
-        <div class="input-container">
-          <input 
-            v-model="userInput"
-            type="text" 
-            class="word-input"
-            :placeholder="isListening ? '正在播放...' : '请输入单词'"
-            @keyup.enter="submitWord"
-            @keyup.space="submitWord"
-            ref="inputRef"
-          />
-          <div class="cursor-line" v-if="!userInput"></div>
-        </div>
+        <SpellingInput
+            v-model=userInput
+            :current-word=currentWord
+            :is-correct=isCorrect
+            @submit="handleSubmitAnswer"/>
+
       </div>
 
       <button class="next-word-btn" @click="nextWord">下个单词</button>
@@ -38,7 +33,7 @@
         <button class="control-btn play" @click="togglePlay">
           {{ isPlaying ? '⏸' : '▶️' }}
         </button>
-        <button class="control-btn" @click="repeat">
+        <button class="control-btn more" @click="repeat">
           再念一遍
         </button>
       </div>
@@ -48,8 +43,8 @@
     <div v-if="showResult" class="result-modal" @click="closeResult">
       <div class="result-content" @click.stop>
         <div class="result-word">
-          <h3>{{ currentWord?.english }}</h3>
-          <p>{{ currentWord?.chinese }}</p>
+          <h3>{{ currentWord?.text }}</h3>
+          <p>{{ currentWord?.note }}</p>
         </div>
         <div class="result-input">
           <p>您的输入: <span :class="{ correct: isCorrect, wrong: !isCorrect }">{{ userInput }}</span></p>
@@ -66,17 +61,25 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { useVocabularyStore } from '../stores/vocabulary'
+import { useVocabularyStore } from '@/stores/vocabulary'
+import { getCorpusItem } from '@/api/corpus'
+import Countdown from './components/Countdown.vue'
+import { useCountdown } from '@/hooks/useCountdown'
+import SpellingInput from './components/SpellingInput.vue'
 
 interface Props {
-  chapter: string
-  paper: string
+  unitId: string
+  lessonId: string
   mode: string
 }
 
 const props = defineProps<Props>()
 const router = useRouter()
 const vocabularyStore = useVocabularyStore()
+
+const countdown = useCountdown(5, () => {
+  console.log('countdown')
+})
 
 const currentIndex = ref(0)
 const userInput = ref('')
@@ -87,12 +90,12 @@ const showResult = ref(false)
 const isCorrect = ref(false)
 const inputRef = ref<HTMLInputElement>()
 
-const chapterId = parseInt(props.chapter)
-const paperId = parseInt(props.paper)
-const testPaper = vocabularyStore.getTestPaper(chapterId, paperId)
-const words = testPaper?.words || []
+const unitId = parseInt(props.unitId)
+const lessonId = parseInt(props.lessonId)
 
-const totalWords = computed(() => words.length)
+const words = vocabularyStore.testPaper?.list || []
+
+const totalWords = computed(() => vocabularyStore.testPaper?.word_count)
 const currentWord = computed(() => words[currentIndex.value])
 
 const speeds = [1.0, 1.2, 1.4, 1.6]
@@ -129,7 +132,7 @@ const repeat = () => {
 
 const submitWord = () => {
   if (!userInput.value.trim()) return
-  
+
   isCorrect.value = userInput.value.toLowerCase().trim() === currentWord.value?.english.toLowerCase()
   showResult.value = true
 }
@@ -155,6 +158,22 @@ const continueNext = () => {
 const closeResult = () => {
   showResult.value = false
 }
+
+// handle submit answer
+const handleSubmitAnswer = () => {
+  countdown.stopCountdown()
+
+}
+
+onMounted(async () => {
+  const res = await getCorpusItem({
+    book_id: 0,
+    unit_id: unitId,
+    lesson_id: lessonId
+  })
+
+  vocabularyStore.setTestPaper(res.data)
+})
 </script>
 
 <style scoped>
@@ -214,42 +233,8 @@ const closeResult = () => {
   max-width: 500px;
 }
 
-.input-container {
-  position: relative;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 16px;
-  padding: 24px;
-  backdrop-filter: blur(10px);
-  min-height: 120px;
-  display: flex;
-  align-items: center;
-}
 
-.word-input {
-  width: 100%;
-  border: none;
-  outline: none;
-  font-size: 24px;
-  background: transparent;
-  text-align: center;
-  color: #333;
-}
 
-.word-input::placeholder {
-  color: #999;
-  font-style: italic;
-}
-
-.cursor-line {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 2px;
-  height: 30px;
-  background: #333;
-  animation: blink 1s infinite;
-}
 
 @keyframes blink {
   0%, 50% { opacity: 1; }

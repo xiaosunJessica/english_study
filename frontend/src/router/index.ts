@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import WordList from '../views/WordList.vue'
 import StudyMode from '../views/StudyMode.vue'
-import Practice from '../views/Practice.vue'
+import Practice from '../views/Practice/Practice.vue'
 
 const routes = [
   {
@@ -17,13 +17,13 @@ const routes = [
     props: true
   },
   {
-    path: '/study/:chapter/:paper',
+    path: '/study/:unitId/:lessonId',
     name: 'StudyMode',
     component: StudyMode,
     props: true
   },
   {
-    path: '/practice/:chapter/:paper/:mode',
+    path: '/practice/:unitId/:lessonId/:mode',
     name: 'Practice',
     component: Practice,
     props: true

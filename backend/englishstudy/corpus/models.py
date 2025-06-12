@@ -49,15 +49,3 @@ class Word(models.Model):
         return self.name
 
 
-class LessonTest(models.Model):
-    unit = models.ForeignKey(Unit, related_name='LessonTest', on_delete=models.CASCADE)
-    text = models.CharField(max_length=255, blank=True)
-    count = models.IntegerField(default=0)
-    product_type = models.IntegerField(null=True, blank=True)
-    url = models.TextField(blank=True)
-    check_url = models.TextField(blank=True)
-    is_selected = models.SmallIntegerField(default=0)
-
-    def __str__(self):
-        return self.name
-

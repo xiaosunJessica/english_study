@@ -15,7 +15,7 @@
         <h2>学习模式</h2>
       </div>
       <div class="mode-grid">
-        <button 
+        <button
           v-for="mode in studyModes"
           :key="mode.id"
           class="mode-card"
@@ -31,7 +31,7 @@
       <div class="setting-group">
         <label class="setting-label">播放倍速</label>
         <div class="speed-selector">
-          <button 
+          <button
             v-for="speed in playbackSpeeds"
             :key="speed"
             class="speed-btn"
@@ -47,14 +47,14 @@
       <div class="setting-group">
         <label class="setting-label">对错反馈</label>
         <div class="feedback-selector">
-          <button 
+          <button
             class="feedback-btn"
             :class="{ active: !showFeedback }"
             @click="showFeedback = false"
           >
             拼写中不反馈
           </button>
-          <button 
+          <button
             class="feedback-btn"
             :class="{ active: showFeedback }"
             @click="showFeedback = true"
@@ -70,7 +70,7 @@
       <p class="info-description">
         拼写模式专门为机考考生设计，是可以练习打字的语料库版本
       </p>
-      
+
       <div class="features">
         <span class="feature-tag">自动识别错词</span>
         <span class="feature-tag">自动计算正确率</span>
@@ -97,8 +97,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 interface Props {
-  chapter: string
-  paper: string
+  unitId: string
+  lessonId: string
 }
 
 const props = defineProps<Props>()
@@ -118,7 +118,7 @@ const studyModes = [
 const playbackSpeeds = [1.0, 1.2, 1.4, 1.6]
 
 const startPractice = () => {
-  router.push(`/practice/${props.chapter}/${props.paper}/${selectedMode.value}`)
+  router.push(`/practice/${props.unitId}/${props.lessonId}/${selectedMode.value}`)
 }
 </script>
 

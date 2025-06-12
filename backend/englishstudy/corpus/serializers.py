@@ -4,7 +4,7 @@
 # @File: serializers
 # @Project: backend
 from rest_framework import serializers
-from .models import LessonTest, Unit, Lesson,  Word
+from .models import Unit, Lesson,  Word
 
 class WordSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,15 +12,6 @@ class WordSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'text', 'note', 'voice', 'url', 'local_url',
             'word_id', 'error_num', 'lesson_id', 'is_wrong', 'wrong_num'
-        ]
-
-class LessonTestSerializer(serializers.ModelSerializer):
-    words = WordSerializer(many=True, read_only=True)
-    class Meta:
-        model = Lesson
-        fields = [
-            'id', 'text', 'count', 'unit_id', 'product_type', 'url',
-            'check_url', 'unit_id', 'is_selected', 'words'
         ]
 
 class LessonSerializer(serializers.ModelSerializer):
