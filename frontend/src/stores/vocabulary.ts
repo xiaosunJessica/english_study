@@ -23,11 +23,13 @@ export interface Chapter {
 }
 
 export interface TestPaper {
+  id: number,
   name: string;
   url: string;
   word_count: string;
   error_count: string;
   extra: string;
+  more: string;
   list: Word[];
 }
 

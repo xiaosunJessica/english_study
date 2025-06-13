@@ -29,7 +29,7 @@
             class="bg-gradient-to-r from-fuchsia-300 to-pink-500 rounded-xl px-5 py-4 flex items-center justify-between cursor-pointer transition-transform hover:translate-x-1 hover:shadow-lg"
           >
             <span class="text-lg font-medium text-white">{{ paper.name }}</span>
-            <span class="text-white/90 text-base">正确率{{ paper.accuracy }}%</span>
+            <span class="text-white/90 text-base">{{ paper.more }}</span>
           </div>
         </div>
       </div>

@@ -22,9 +22,8 @@ class Lesson(models.Model):
     is_checked = models.CharField(max_length=10, default="2")
     extra = models.CharField(max_length=100, blank=True)
     url = models.URLField()
-    word_count = models.CharField(max_length=50)  # 如 "共112个单词"
-    error_count = models.CharField(max_length=50) # 如 "错5个单词"
-    more = models.CharField(max_length= 100) # 未练 / 正确率
+    word_count = models.IntegerField(max_length=50)  # 如 "共112个单词"
+    error_count = models.IntegerField(max_length=50) # 如 "错5个单词"
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=1)
 
     def __str__(self):

@@ -21,7 +21,8 @@
       <div
         v-for="(word, index) in displayWords.value"
         :key="word.id"
-        class="flex items-center gap-4 py-4 border-b border-black/5 last:border-b-0"
+        class="flex items-center gap-4 py-4 border-b border-black/5 last:border-b-0 cursor-pointer"
+        @click="onPlay(word.url)"
       >
         <div class="text-lg font-bold text-gray-600 min-w-[30px]">{{ index + 1 }}.</div>
         <div class="flex-1">
@@ -55,6 +56,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useVocabularyStore } from '../stores/vocabulary'
 import { getCorpusItem } from '../api/corpus'
+import { useAudio } from '../hooks/useAudio'
 
 interface Props {
   unitId: string
@@ -70,6 +72,7 @@ const activeTab = ref<'all' | 'wrong'>('all')
 
 const unitId = parseInt(props.unitId)
 const lessonId = parseInt(props.lessonId)
+const audio = useAudio()
 
 
 
@@ -80,13 +83,6 @@ const displayWords = computed(() => {
   return activeTab.value === 'all' ? allWords : wrongWords
 })
 
-const goBack = () => {
-  router.go(-1)
-}
-
-const goHome = () => {
-  router.push('/')
-}
 
 const startFromWord = () => {
   // Implementation for starting from specific word
@@ -95,6 +91,10 @@ const startFromWord = () => {
 
 const startStudy = () => {
   router.push(`/study/${unitId}/${lessonId}`)
+}
+
+const onPlay = (url: string) => {
+  audio.play(url)
 }
 
 onMounted(async () => {
