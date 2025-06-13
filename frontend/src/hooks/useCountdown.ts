@@ -5,12 +5,12 @@ export const useCountdown = (seconds: number, onComplete?: () => void) => {
   const isActive = ref(false)
   const timer = ref<number | null>(null)
 
-  const startCountdown = () => {
+  const start = () => {
     if (isActive.value) return
     isActive.value = true
     timer.value = setInterval(() => {
       if (timeLeft.value <= 0) {
-        stopCountdown()
+        stop()
         onComplete?.()
       } else {
         timeLeft.value--
@@ -18,7 +18,7 @@ export const useCountdown = (seconds: number, onComplete?: () => void) => {
     }, 1000)
   }
 
-  const stopCountdown = () => {
+  const stop = () => {
     isActive.value = false
     if (timer.value) {
       clearInterval(timer.value)
@@ -28,16 +28,16 @@ export const useCountdown = (seconds: number, onComplete?: () => void) => {
   }
 
 
-  const resetCountdown = () => {
+  const reset = () => {
     timeLeft.value = seconds
-    stopCountdown()
+    stop()
   }
 
   return {
     timeLeft,
     isActive,
-    startCountdown,
-    stopCountdown,
-    resetCountdown
+    start,
+    stop,
+    reset
   }
 }

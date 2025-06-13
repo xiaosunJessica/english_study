@@ -1,5 +1,5 @@
 <template>
-   <div class="px-6 py-8">
+   <div class="py-8">
     <div class="relative">
 
      <div class="input-container">
@@ -57,13 +57,14 @@ const handleSubmit = () => {
 
 .input-container {
   position: relative;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 0;
+  padding: 0;
   backdrop-filter: blur(10px);
-  min-height: 120px;
   display: flex;
   align-items: center;
+  max-width: 500px;
+  border-bottom: 1px solid;
+  margin: auto;
 }
 
 .word-input {

@@ -1,42 +1,39 @@
 <template>
-  <div class="practice">
-    <header class="header">
+  <div class="min-h-screen bg-gray-50">
+    <header class="header flex items-center justify-between">
       <div class="progress-info">
         <span class="mode-title">拼写 ({{ currentIndex + 1 }}/{{ totalWords }})</span>
-        <div class="toggle-group">
-          <button class="toggle-btn">对答案</button>
-          <button class="toggle-btn">巩固错词</button>
-        </div>
       </div>
-      <Countdown :seconds="countdown.timeLeft" :is-active="countdown.isActive" />
+      <Countdown :seconds="countdown.timeLeft?.value" :is-active="countdown.isActive?.value" />
     </header>
 
-    <div class="practice-area">
-      <div class="word-display">
+    <div class="flex flex-col h-[calc(100vh-140px)]">
+      <div class="flex-1 flex flex-col justify-center">
         <SpellingInput
-            v-model=userInput
-            :current-word=currentWord
-            :is-correct=isCorrect
-            @submit="handleSubmitAnswer"/>
-
+          v-model=userInput
+          :current-word= "currentWord?.value?.note || ''"
+          :is-correct=isCorrect
+          @submit="handleSubmitAnswer"/>
       </div>
 
-      <button class="next-word-btn" @click="nextWord">下个单词</button>
-
-      <div class="controls">
-        <button class="control-btn speed" @click="toggleSpeed">
-          🔄 {{ currentSpeed }}倍速
-        </button>
-        <button class="control-btn" @click="playAudio">
-          ⏮
-        </button>
-        <button class="control-btn play" @click="togglePlay">
-          {{ isPlaying ? '⏸' : '▶️' }}
-        </button>
-        <button class="control-btn more" @click="repeat">
-          再念一遍
-        </button>
+      <div class="bg-white border-t border-gray-200 space-y-4">
+        <div class="flex justify-center items-center gap-6 px-6 py-4">
+          <button class="control-btn speed" @click="toggleSpeed">
+            🔄 {{ currentSpeed }}倍速
+          </button>
+          <button class="control-btn" @click="prevWord">
+            <img src="@/assets/icon-prev.svg" alt="prev" />
+          </button>
+          <button class="control-btn" @click="togglePlay">
+            <img v-if="isPlaying" src="@/assets/icon-pause.svg" alt="pause" />
+            <img v-else src="@/assets/icon-play.svg" alt="play" />
+          </button>
+          <button class="control-btn more" @click="repeat">
+            <img src="@/assets/icon-repeat-one.svg" alt="repeat" />
+          </button>
+        </div>
       </div>
+
     </div>
 
     <!-- Result Modal -->
@@ -59,13 +56,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useVocabularyStore } from '@/stores/vocabulary'
+import { useVocabularyStore, type Word } from '@/stores/vocabulary'
 import { getCorpusItem } from '@/api/corpus'
 import Countdown from './components/Countdown.vue'
 import { useCountdown } from '@/hooks/useCountdown'
 import SpellingInput from './components/SpellingInput.vue'
+import { useAudio } from '@/hooks/useAudio'
 
 interface Props {
   unitId: string
@@ -73,19 +71,24 @@ interface Props {
   mode: string
 }
 
+const COUNTDOWN_NUMBER = 5
 const props = defineProps<Props>()
 const router = useRouter()
 const vocabularyStore = useVocabularyStore()
 
+// 倒计时
 const countdown = useCountdown(5, () => {
-  console.log('countdown')
+  nextWord()
 })
+
+// 音频控件
+const audio = useAudio()
 
 const currentIndex = ref(0)
 const userInput = ref('')
 const isPlaying = ref(false)
 const isListening = ref(false)
-const currentSpeed = ref(1.4)
+const currentSpeed = ref(1.0)
 const showResult = ref(false)
 const isCorrect = ref(false)
 const inputRef = ref<HTMLInputElement>()
@@ -93,41 +96,37 @@ const inputRef = ref<HTMLInputElement>()
 const unitId = parseInt(props.unitId)
 const lessonId = parseInt(props.lessonId)
 
-const words = vocabularyStore.testPaper?.list || []
-
+const words = computed <Word[]>(() => vocabularyStore.testPaper?.list || [])
 const totalWords = computed(() => vocabularyStore.testPaper?.word_count)
-const currentWord = computed(() => words[currentIndex.value])
+const currentWord = computed(() => words.value[currentIndex.value])
 
 const speeds = [1.0, 1.2, 1.4, 1.6]
 
-onMounted(() => {
-  nextTick(() => {
-    inputRef.value?.focus()
-  })
-})
+
 
 const toggleSpeed = () => {
   const currentSpeedIndex = speeds.indexOf(currentSpeed.value)
   const nextIndex = (currentSpeedIndex + 1) % speeds.length
   currentSpeed.value = speeds[nextIndex]
+  audio.changePlaybackRate(currentSpeed.value)
 }
 
-const playAudio = () => {
-  isListening.value = true
-  setTimeout(() => {
-    isListening.value = false
-  }, 1000)
-}
+
 
 const togglePlay = () => {
   isPlaying.value = !isPlaying.value
   if (isPlaying.value) {
-    playAudio()
+    countdown.reset(COUNTDOWN_NUMBER)
+    countdown.start()
+    audio.play(currentWord.value?.url)
+  } else {
+    countdown.stop()
+    audio.pause()
   }
 }
 
 const repeat = () => {
-  playAudio()
+  // playAudio()
 }
 
 const submitWord = () => {
@@ -137,6 +136,23 @@ const submitWord = () => {
   showResult.value = true
 }
 
+// 上一个
+const prevWord = () => {
+  isListening.value = true
+  if (currentIndex.value > 1) {
+    currentIndex.value--
+    userInput.value = ''
+    nextTick(() => {
+      inputRef.value?.focus()
+    })
+    countdown.reset(COUNTDOWN_NUMBER)
+    if (currentWord.value?.url) {
+      audio.play(currentWord.value?.url)
+    }
+    countdown.start()
+  }
+}
+// 下一个
 const nextWord = () => {
   if (currentIndex.value < totalWords.value - 1) {
     currentIndex.value++
@@ -144,11 +160,19 @@ const nextWord = () => {
     nextTick(() => {
       inputRef.value?.focus()
     })
+    countdown.reset(COUNTDOWN_NUMBER)
+    if (currentWord.value?.url) {
+      audio.play(currentWord.value?.url)
+    }
+    countdown.start()
   } else {
     // Practice completed
-    router.push(`/wordlist/${props.chapter}/${props.paper}`)
+    router.push(`/wordlist/${props.unitId}/${props.lessonId}`)
   }
 }
+
+//
+
 
 const continueNext = () => {
   showResult.value = false
@@ -165,13 +189,18 @@ const handleSubmitAnswer = () => {
 
 }
 
+
 onMounted(async () => {
+  // input focus
+  nextTick(() => {
+    inputRef.value?.focus()
+  })
+  // get data
   const res = await getCorpusItem({
     book_id: 0,
     unit_id: unitId,
     lesson_id: lessonId
   })
-
   vocabularyStore.setTestPaper(res.data)
 })
 </script>
@@ -179,9 +208,7 @@ onMounted(async () => {
 <style scoped>
 .practice {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   padding: 20px;
-  max-width: 800px;
   margin: 0 auto;
 }
 
@@ -225,12 +252,10 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   gap: 40px;
-  padding: 40px 20px;
 }
 
 .word-display {
   width: 100%;
-  max-width: 500px;
 }
 
 
@@ -278,6 +303,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 10px;
 }
 
 .control-btn.speed {
@@ -285,14 +311,6 @@ onMounted(async () => {
   width: auto;
   padding: 0 20px;
   font-size: 14px;
-}
-
-.control-btn.play {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  width: 80px;
-  height: 80px;
-  font-size: 24px;
 }
 
 .control-btn:hover {
