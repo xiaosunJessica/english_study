@@ -1,52 +1,55 @@
 <template>
-  <div class="word-list">
-    <header class="header">
-      <button class="back-btn" @click="goBack">←</button>
-      <button class="home-btn" @click="goHome">🏠</button>
-      <h1 class="title">{{ vocabularyStore.testPaper?.name }}</h1>
-    </header>
-
-    <div class="tabs">
+  <div class="h-screen bg-gradient-to-br from-gray-100 to-blue-200 p-5 flex flex-col mx-auto">
+    <div class="flex gap-2 mb-6">
       <button
-        class="tab"
-        :class="{ active: activeTab === 'all' }"
+        class="px-6 py-3 rounded-full text-base backdrop-blur-sm transition-all"
+        :class="activeTab === 'all' ? 'bg-gradient-to-r from-pink-400 to-red-400 text-white font-bold' : 'bg-white/70 hover:bg-white/90'"
         @click="activeTab = 'all'"
       >
         全部({{ allWords.length }})
       </button>
       <button
-        class="tab"
-        :class="{ active: activeTab === 'wrong' }"
+        class="px-6 py-3 rounded-full text-base backdrop-blur-sm transition-all"
+        :class="activeTab === 'wrong' ? 'bg-gradient-to-r from-pink-400 to-red-400 text-white font-bold' : 'bg-white/70 hover:bg-white/90'"
         @click="activeTab = 'wrong'"
       >
         近期错词({{ wrongWords.length }})
       </button>
     </div>
 
-    <div class="word-container">
+    <div class="flex-1 bg-white/90 rounded-xl p-6 mb-6 backdrop-blur-sm overflow-y-auto">
       <div
         v-for="(word, index) in displayWords.value"
         :key="word.id"
-        class="word-item"
+        class="flex items-center gap-4 py-4 border-b border-black/5 last:border-b-0"
       >
-        <div class="word-number">{{ index + 1 }}.</div>
-        <div class="word-content">
-          <div class="word-english">{{ word.text }}</div>
-          <div class="word-chinese">{{ word.note }}</div>
+        <div class="text-lg font-bold text-gray-600 min-w-[30px]">{{ index + 1 }}.</div>
+        <div class="flex-1">
+          <div class="text-xl font-bold text-gray-800 mb-1">{{ word.text }}</div>
+          <div class="text-base text-gray-600">{{ word.note }}</div>
         </div>
-        <div v-if="word.is_wrong" class="wrong-indicator">
+        <div v-if="word.is_wrong" class="bg-red-400 text-white rounded-full px-3 py-1 text-xs font-bold">
           错过{{ word.wrong_num }}次
         </div>
       </div>
     </div>
 
-    <div class="actions">
-      <button class="action-btn secondary" @click="startFromWord">从某词开始</button>
-      <button class="action-btn primary" @click="startStudy">开始学习</button>
+    <div class="flex justify-center gap-4">
+      <button
+        class="min-w-[160px] px-8 py-4 rounded-full font-bold text-lg bg-white/90 text-gray-800 backdrop-blur-sm hover:translate-y-[-2px] hover:shadow-lg transition"
+        @click="startFromWord"
+      >
+        从某词开始
+      </button>
+      <button
+        class="min-w-[160px] px-8 py-4 rounded-full font-bold text-lg text-white bg-gradient-to-r from-pink-300 to-pink-100 hover:translate-y-[-2px] hover:shadow-lg transition"
+        @click="startStudy"
+      >
+        开始学习
+      </button>
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -105,158 +108,3 @@ onMounted(async () => {
   setTestPaper(res.data)
 })
 </script>
-
-<style scoped>
-.word-list {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.back-btn, .home-btn {
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  border-radius: 12px;
-  width: 48px;
-  height: 48px;
-  font-size: 20px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
-}
-
-.back-btn:hover, .home-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-}
-
-.title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-  margin: 0;
-}
-
-.tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-
-.tab {
-  background: rgba(255, 255, 255, 0.7);
-  border: none;
-  border-radius: 24px;
-  padding: 12px 24px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
-}
-
-.tab.active {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  color: white;
-  font-weight: bold;
-}
-
-.tab:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.word-container {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 24px;
-  backdrop-filter: blur(10px);
-  max-height: 60vh;
-  overflow-y: auto;
-}
-
-.word-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.word-item:last-child {
-  border-bottom: none;
-}
-
-.word-number {
-  font-size: 18px;
-  font-weight: bold;
-  color: #666;
-  min-width: 30px;
-}
-
-.word-content {
-  flex: 1;
-}
-
-.word-english {
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 4px;
-}
-
-.word-chinese {
-  font-size: 16px;
-  color: #666;
-}
-
-.wrong-indicator {
-  background: #ff6b6b;
-  color: white;
-  border-radius: 12px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.actions {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-}
-
-.action-btn {
-  border: none;
-  border-radius: 24px;
-  padding: 16px 32px;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 160px;
-}
-
-.action-btn.secondary {
-  background: rgba(255, 255, 255, 0.9);
-  color: #333;
-  backdrop-filter: blur(10px);
-}
-
-.action-btn.primary {
-  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-  color: white;
-}
-
-.action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-}
-</style>

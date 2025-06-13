@@ -1,25 +1,14 @@
 <template>
-   <div class="py-8">
-    <div class="relative">
+  <div class="mx-auto min-w-[30rem] max-w-[40rem]mx-auto">
+    <label class="block text-lg font-medium text-gray-700 mb-4 text-center"> 请输入您听到的单词 </label>
+    <input
+     v-model="inputValue"
+     @keyup.enter="handleSubmit"
+     placeholder="请输入单词拼写..."
+     class="w-full text-center text-3xl py-6 border-b-2 border-gray-300 bg-transparent focus:border-pink-500 focus:outline-none transition-colors placeholder:text-gray-400"
+    />
 
-     <div class="input-container">
-       <input
-         v-model="inputValue"
-         @keyup.enter="handleSubmit"
-         placeholder="请输入单词拼写..."
-         :class="[
-           'word-input w-full px-6 py-4 text-lg text-center border-2 rounded-2xl',
-           'transition-all duration-300 focus:outline-none',
-           isCorrect
-               ? 'border-green-500 bg-green-50 text-green-700'
-               : 'border-red-500 bg-red-50 text-red-700'
-         ]"
-       />
-
-       <div class="cursor-line" v-if="!inputValue"></div>
-      </div>
-
-    </div>
+     <div class="cursor-line" v-if="!inputValue"></div>
   </div>
 </template>
 
@@ -52,44 +41,3 @@ const handleSubmit = () => {
    emit('submit', inputValue.value)
 }
 </script>
-
-<style scoped>
-
-.input-container {
-  position: relative;
-  border-radius: 0;
-  padding: 0;
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  max-width: 500px;
-  border-bottom: 1px solid;
-  margin: auto;
-}
-
-.word-input {
-  width: 100%;
-  border: none;
-  outline: none;
-  font-size: 24px;
-  background: transparent;
-  text-align: center;
-  color: #333;
-}
-
-.word-input::placeholder {
-  color: #999;
-  font-style: italic;
-}
-
-.cursor-line {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 2px;
-  height: 30px;
-  background: #333;
-  animation: blink 1s infinite;
-}
-</style>
