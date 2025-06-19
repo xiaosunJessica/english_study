@@ -10,8 +10,7 @@ class WordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
         fields = [
-            'id', 'text', 'note', 'voice', 'url', 'local_url',
-            'word_id', 'error_num', 'lesson_id', 'is_wrong', 'wrong_num'
+            'id', 'text', 'note', 'voice', 'url', 'local_url', 'error_num', 'lesson_id', 'is_wrong', 'wrong_num'
         ]
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -38,7 +37,7 @@ class LessonDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Lesson
-        fields = ['name', 'url', 'word_count', 'error_count', 'extra', 'list']
+        fields = ['name', 'url', 'word_count', 'error_count', 'extra', 'list', 'status']
 
     def get_list(self, obj):
         return WordSerializer(obj.words.all(), many=True).data

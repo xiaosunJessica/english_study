@@ -69,7 +69,7 @@ for chapter_itm in data:
                             "voice": word.get("voice", ""),
                             "url": word.get("url", ""),
                             "local_url": word.get("local_url", ""),
-                            "word_id": word.get("word_id", ""),
+                            "id": word.get("id", ""),
                             "error_num": word.get("error_num", ""),
                             "lesson_id": int(word.get("lesson_id", 0) or 0)
                         }

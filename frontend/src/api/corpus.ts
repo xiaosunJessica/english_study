@@ -15,6 +15,19 @@ export const getCorpusItem = (params: {
   return request({
     url: '/ApicorpusFly/fullItem',
     method: 'get',
-    params: params
+    params
   });
 };
+
+export const setErrorWord = (params: {
+  book_id?: number,
+  unit_id: string,
+  lesson_id: string,
+  errorWords: {[key: string]: string}
+}) => {
+  return request({
+    url: '/ApicorpusFly/setErrorWord',
+    method: 'post',
+    data: params
+  })
+}

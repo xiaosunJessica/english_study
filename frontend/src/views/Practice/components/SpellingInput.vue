@@ -16,7 +16,7 @@
 import { computed, watch } from 'vue'
 interface Props {
   modelValue: string
-  currentWord: string
+  currentWord: Object
   isCorrect?: boolean
   showResult?: boolean
 }
@@ -25,8 +25,9 @@ const props = defineProps<Props>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
-  submit: [value: string]
+  submit: [value: object]
 }>()
+
 
 const inputValue = computed({
   get: () => props.modelValue,
@@ -34,10 +35,18 @@ const inputValue = computed({
 })
 
 watch(() => props.currentWord, () => {
-  inputValue.value = ''
-})
+    inputValue.value = ''
+}, {flush: 'pre'})
 
 const handleSubmit = () => {
-   emit('submit', inputValue.value)
+  emit('submit', {
+    ...props.currentWord,
+    inputValue: inputValue.value
+  })
 }
+
+defineExpose({
+  handleSubmit
+})
+
 </script>

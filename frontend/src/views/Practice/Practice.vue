@@ -14,8 +14,9 @@
     <div class="flex flex-col flex-1">
       <div class="flex-1 flex flex-col justify-center">
         <SpellingInput
+          ref="spellingInputRef"
           v-model="userInput"
-          :current-word="currentWord?.value?.note || ''"
+          :current-word="currentWord"
           :is-correct="isCorrect"
           @submit="handleSubmitAnswer"
         />
@@ -112,10 +113,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useVocabularyStore, type Word } from '@/stores/vocabulary'
-import { getCorpusItem } from '@/api/corpus'
+import { getCorpusItem, setErrorWord } from '@/api/corpus'
 import Countdown from './components/Countdown.vue'
 import { useCountdown } from '@/hooks/useCountdown'
 import SpellingInput from './components/SpellingInput.vue'
@@ -133,9 +134,11 @@ const router = useRouter()
 const vocabularyStore = useVocabularyStore()
 
 // 倒计时
-const countdown = useCountdown(5, () => {
+const countdown = useCountdown(COUNTDOWN_NUMBER, () => {
   nextWord()
 })
+
+const spellingInputRef = ref()
 
 // 音频控件
 const audio = useAudio()
@@ -153,11 +156,13 @@ const unitId = parseInt(props.unitId)
 const lessonId = parseInt(props.lessonId)
 
 const words = computed <Word[]>(() => vocabularyStore.testPaper?.list || [])
-const totalWords = computed(() => vocabularyStore.testPaper?.word_count)
+const totalWords = computed<number>(() => Number(vocabularyStore.testPaper?.word_count) || 0)
 const currentWord = computed(() => words.value[currentIndex.value])
 
 const speeds = [1.0, 1.2, 1.4, 1.6]
 
+// 记录错误结果
+const vocabularyErrorMap = ref(new Map<string, string>())
 
 
 const toggleSpeed = () => {
@@ -172,7 +177,7 @@ const toggleSpeed = () => {
 const togglePlay = () => {
   isPlaying.value = !isPlaying.value
   if (isPlaying.value) {
-    countdown.reset(COUNTDOWN_NUMBER)
+    countdown.reset()
     countdown.start()
     audio.play(currentWord.value?.url)
   } else {
@@ -185,12 +190,6 @@ const repeat = () => {
   // playAudio()
 }
 
-const submitWord = () => {
-  if (!userInput.value.trim()) return
-
-  isCorrect.value = userInput.value.toLowerCase().trim() === currentWord.value?.english.toLowerCase()
-  showResult.value = true
-}
 
 // 上一个
 const prevWord = () => {
@@ -201,7 +200,7 @@ const prevWord = () => {
     nextTick(() => {
       inputRef.value?.focus()
     })
-    countdown.reset(COUNTDOWN_NUMBER)
+    countdown.reset()
     if (currentWord.value?.url) {
       audio.play(currentWord.value?.url)
     }
@@ -210,20 +209,29 @@ const prevWord = () => {
 }
 // 下一个
 const nextWord = () => {
+  // 先提交
+  spellingInputRef.value?.handleSubmit()
+  // 切换word
   if (currentIndex.value < totalWords.value - 1) {
     currentIndex.value++
     userInput.value = ''
     nextTick(() => {
       inputRef.value?.focus()
     })
-    countdown.reset(COUNTDOWN_NUMBER)
+    countdown.reset()
     if (currentWord.value?.url) {
       audio.play(currentWord.value?.url)
     }
     countdown.start()
   } else {
+    console.log(totalWords, '00000--finished', vocabularyErrorMap)
+    setErrorWord({
+      lesson_id: props.lessonId,
+      unit_id: props.unitId,
+      errorWords: Object.fromEntries(vocabularyErrorMap.value.entries())
+    })
     // Practice completed
-    router.push(`/wordlist/${props.unitId}/${props.lessonId}`)
+    // router.push(`/wordlist/${props.unitId}/${props.lessonId}`)
   }
 }
 
@@ -240,9 +248,20 @@ const closeResult = () => {
 }
 
 // handle submit answer
-const handleSubmitAnswer = () => {
-  countdown.stopCountdown()
+const handleSubmitAnswer = (answer: {
+  inputValue: string;
+  id: string;
+  text: string
+}) => {
+  // 如果校验正确，且之前错误，清除
+  if (answer.inputValue == answer.text && vocabularyErrorMap.value.get(answer.id)) {
+    vocabularyErrorMap.value.delete(answer.id)
+  }
 
+  // 如果错误，不管以前是否存在，直接替换
+  if (answer.inputValue != answer.text) {
+    vocabularyErrorMap.value.set(answer.id, answer.inputValue)
+  }
 }
 
 
