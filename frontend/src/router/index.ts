@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
+import Chapter from '../views/Chapter/Chaper.vue'
 import WordList from '../views/WordList.vue'
 import StudyMode from '../views/StudyMode.vue'
 import Practice from '../views/Practice/Practice.vue'
@@ -7,8 +7,8 @@ import Practice from '../views/Practice/Practice.vue'
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: Home
+    name: 'Chapter',
+    component: Chapter
   },
   {
     path: '/wordlist/:unitId/:lessonId',

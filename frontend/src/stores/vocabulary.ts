@@ -16,14 +16,15 @@ export interface Word {
 }
 
 export interface Chapter {
-  id: number
+  id: string
   title: string
   subtitle: string
-  testPapers: TestPaper[]
+  intro: string
+  list: TestPaper[]
 }
 
 export interface TestPaper {
-  id: number,
+  id: string,
   name: string;
   url: string;
   word_count: string;
@@ -38,12 +39,11 @@ export const useVocabularyStore = defineStore('vocabulary', () => {
 
   const testPaper = ref<TestPaper>()
 
-  const getChapter = (id: number) => {
+  const getChapter = (id: string) => {
     return chapters.value.find(chapter => chapter.id === id)
   }
 
   const setTestPaper = (newTestPaper: TestPaper) => {
-    console.log(newTestPaper, '00000testPaper')
     testPaper.value = newTestPaper
   }
 
