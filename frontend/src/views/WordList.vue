@@ -91,9 +91,10 @@ const audio = useAudio()
 
 
 const allWords = computed(() => vocabularyStore.testPaper?.list || [])
-const wrongWords = computed(() => allWords.value.filter(word => word.is_wrong))
+const wrongWords = computed(() => allWords.value.filter(word => word.is_wrong == 2))
 
 const displayWords = computed(() => {
+  console.log(activeTab.value, 'activeTab.valueactiveTab.value')
   return activeTab.value === 'all' ? allWords : wrongWords
 })
 
@@ -107,7 +108,6 @@ const onPlay = (url: string) => {
 }
 
 onMounted(async () => {
-
   const res = await getCorpusItem({
     book_id: 0,
     unit_id: unitId,

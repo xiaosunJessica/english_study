@@ -148,7 +148,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+// import { useRouter } from 'vue-router'
 import { useVocabularyStore, type Word } from '@/stores/vocabulary'
 import { getCorpusItem, setErrorWord } from '@/api/corpus'
 import Countdown from './components/Countdown.vue'
@@ -165,7 +165,7 @@ interface Props {
 
 const COUNTDOWN_NUMBER = 5
 const props = defineProps<Props>()
-const router = useRouter()
+// const router = useRouter()
 const vocabularyStore = useVocabularyStore()
 
 // 倒计时

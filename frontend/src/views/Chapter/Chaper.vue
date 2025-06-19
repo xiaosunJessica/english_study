@@ -14,7 +14,7 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useVocabularyStore } from '@/stores/vocabulary'
 import { getCorpusList } from '@/api/corpus'
-import ChapterItem from './chapterItem.vue'
+import ChapterItem from './ChapterItem.vue'
 
 const regex = /^(Chapter\s*\d+)\s*(.*)$/;
 

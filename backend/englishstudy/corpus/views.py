@@ -81,7 +81,9 @@ class SetErrorWordsView(APIView):
         try:
             error_words = request.data.get('errorWords', {})
             ids = list(error_words.keys())
-
+            lesson_id = request.data.get('lesson_id')
+            # 先将本lesson下的所有单词is_wrong设置为1
+            Word.objects.filter(lesson_id = lesson_id).update(is_wrong = 1)
             # 批量更新is_wrong字段
             updated = Word.objects.filter(id__in = ids).update(is_wrong = 2)
 

@@ -11,7 +11,7 @@ export interface Word {
   word_id: string;
   error_num: number;
   lesson_id: number;
-  is_wrong: boolean;
+  is_wrong: number;
   wrong_num: number;
 }
 
