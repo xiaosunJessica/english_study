@@ -11,6 +11,26 @@
       <Countdown :seconds="countdown.timeLeft?.value" :is-active="countdown.isActive?.value" />
     </header>
 
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">进度统计</h3>
+      <div class="space-y-3">
+        <div class="flex justify-between">
+          <span class="text-gray-600">当前进度</span>
+          <span class="font-medium">{{ currentIndex }}/{{ words.length }}</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div
+            class="bg-pink-500 h-2 rounded-full transition-all duration-300"
+            :style="{ width: `${((currentIndex) / words.length) * 100}%` }"
+          ></div>
+        </div>
+        <div class="flex justify-between text-sm text-gray-500">
+          <span>完成度: {{ Math.round(((currentIndex) / words.length) * 100) }}%</span>
+          <span>剩余: {{ words.length - currentIndex }}</span>
+        </div>
+      </div>
+    </div>
+
     <div class="flex flex-col flex-1">
       <div class="flex-1 flex flex-col justify-center">
         <SpellingInput
@@ -26,38 +46,52 @@
         <div
           class="flex justify-center items-center gap-6 px-6 py-4"
         >
-          <button
-            class="p-0 rounded-full bg-white/90 border-none py-2 px-5 text-sm cursor-pointer backdrop-blur-md hover:shadow-md transition-transform duration-200 ease-in-out"
-            @click="toggleSpeed"
+
+        <button
+          type="button"
+          class="p-4 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors active:scale-95"
+          title="调整播放速度"
+        >
+          <Volume2 :size="24" class="text-gray-600" />
+        </button>
+        <button
+          class="p-0 rounded-full bg-white/90 border-none py-2 px-5 text-sm cursor-pointer backdrop-blur-md hover:shadow-md transition-transform duration-200 ease-in-out"
+          @click="toggleSpeed"
+        >
+          🔄 {{ currentSpeed }}倍速
+        </button>
+
+        <button
+          type="button"
+          class="cursor-pointer p-4 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+          :disabled="currentIndex === 0"
+          @click="prevWord"
+        >
+          <SkipBack :size="24" class="text-gray-600" />
+        </button>
+
+        <button
+          type="button"
+          class="cursor-pointer p-4 bg-pink-500 rounded-full hover:bg-pink-600 transition-colors shadow-lg active:scale-95"
+          @click="togglePlay"
+        >
+          <Pause v-if="isPlaying" :size="26" class="text-white" />
+          <Play v-else :size="26" class="text-white ml-1" />
+        </button>
+        <button
+          type="button"
+          class="cursor-pointer p-4 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+          :disabled="currentIndex === words.length - 1"
+        >
+          <SkipForward :size="24" class="text-gray-600" />
+        </button>
+        <button
+          type="button"
+          class="cursor-pointer p-4 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors active:scale-95"
+          title="重新播放"
+          @click="repeat"
           >
-            🔄 {{ currentSpeed }}倍速
-          </button>
-          <button
-            class="p-0 rounded-full bg-white/90 border-none w-14 h-14 flex items-center justify-center cursor-pointer backdrop-blur-md hover:shadow-md transition-transform duration-200 ease-in-out"
-            @click="prevWord"
-          >
-            <img src="@/assets/icon-prev.svg" alt="prev" />
-          </button>
-          <button
-            class="p-0 rounded-full bg-white/90 border-none w-14 h-14 flex items-center justify-center cursor-pointer backdrop-blur-md hover:shadow-md transition-transform duration-200 ease-in-out"
-            @click="togglePlay"
-          >
-            <img
-              v-if="isPlaying"
-              src="@/assets/icon-pause.svg"
-              alt="pause"
-            />
-            <img
-              v-else
-              src="@/assets/icon-play.svg"
-              alt="play"
-            />
-          </button>
-          <button
-            class="p-0 more rounded-full bg-white/90 border-none w-14 h-14 flex items-center justify-center cursor-pointer backdrop-blur-md hover:shadow-md transition-transform duration-200 ease-in-out"
-            @click="repeat"
-          >
-            <img src="@/assets/icon-repeat-one.svg" alt="repeat" />
+            <RotateCcw :size="24" class="text-gray-600" />
           </button>
         </div>
       </div>
@@ -121,6 +155,7 @@ import Countdown from './components/Countdown.vue'
 import { useCountdown } from '@/hooks/useCountdown'
 import SpellingInput from './components/SpellingInput.vue'
 import { useAudio } from '@/hooks/useAudio'
+import { Play, Pause, SkipBack, SkipForward, RotateCcw, Volume2 } from 'lucide-vue-next'
 
 interface Props {
   unitId: string

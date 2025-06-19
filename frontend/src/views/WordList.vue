@@ -1,19 +1,20 @@
 <template>
   <div class="h-screen bg-gradient-to-br from-gray-100 to-blue-200 p-5 flex flex-col mx-auto">
+    <div class="text-3xl font-bold text-gray-900 mb-2">{{vocabularyStore?.testPaper?.name }}</div>
     <div class="flex gap-2 mb-6">
       <button
-        class="px-6 py-3 rounded-full text-base backdrop-blur-sm transition-all"
+        class="px-6 py-3 rounded-full text-base backdrop-blur-sm transition-all cursor-pointer"
         :class="activeTab === 'all' ? 'bg-gradient-to-r from-pink-400 to-red-400 text-white font-bold' : 'bg-white/70 hover:bg-white/90'"
         @click="activeTab = 'all'"
       >
-        全部({{ allWords.length }})
+        全部({{ vocabularyStore?.testPaper?.word_count }})
       </button>
       <button
-        class="px-6 py-3 rounded-full text-base backdrop-blur-sm transition-all"
+        class="px-6 py-3 rounded-full text-base backdrop-blur-sm transition-all cursor-pointer"
         :class="activeTab === 'wrong' ? 'bg-gradient-to-r from-pink-400 to-red-400 text-white font-bold' : 'bg-white/70 hover:bg-white/90'"
         @click="activeTab = 'wrong'"
       >
-        近期错词({{ wrongWords.length }})
+        近期错词({{ vocabularyStore?.testPaper?.error_count }})
       </button>
     </div>
 
@@ -26,7 +27,7 @@
       >
         <div class="text-lg font-bold text-gray-600 min-w-[30px]">{{ index + 1 }}.</div>
         <div class="flex-1">
-          <div class="text-xl font-bold text-gray-800 mb-1">{{ word.text }}</div>
+          <div class="text-xl font-bold text-gray-800 mb-1"><span>{{ word.text }}</span> <span class="ml-1 text-gray-400 text-xs">/{{word.voice}}/</span></div>
           <div class="text-base text-gray-600">{{ word.note }}</div>
         </div>
         <div v-if="word.is_wrong" class="bg-red-400 text-white rounded-full px-3 py-1 text-xs font-bold">
@@ -35,19 +36,33 @@
       </div>
     </div>
 
-    <div class="flex justify-center gap-4">
-      <button
-        class="min-w-[160px] px-8 py-4 rounded-full font-bold text-lg bg-white/90 text-gray-800 backdrop-blur-sm hover:translate-y-[-2px] hover:shadow-lg transition"
-        @click="startFromWord"
-      >
-        从某词开始
-      </button>
-      <button
-        class="min-w-[160px] px-8 py-4 rounded-full font-bold text-lg text-white bg-gradient-to-r from-pink-300 to-pink-100 hover:translate-y-[-2px] hover:shadow-lg transition"
-        @click="startStudy"
-      >
-        开始学习
-      </button>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">学习统计</h3>
+      <div class="space-y-4 mb-8">
+        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+          <span class="text-gray-600">总单词数</span>
+          <span class="font-semibold text-gray-800">{{  vocabularyStore?.testPaper?.word_count }}</span>
+        </div>
+        <div class="flex justify-between items-center p-4 bg-red-50 rounded-lg">
+          <span class="text-gray-600">错词数</span>
+          <span class="font-semibold text-red-600">{{  vocabularyStore?.testPaper?.error_count  }}</span>
+        </div>
+        <div class="flex justify-between items-center p-4 bg-green-50 rounded-lg">
+          <span class="text-gray-600">掌握率</span>
+          <span class="font-semibold text-green-600">
+            {{ Math.round(((Number(vocabularyStore?.testPaper?.word_count || 0) - Number(vocabularyStore?.testPaper?.error_count || 0)) / Number(vocabularyStore?.testPaper?.word_count)) * 100) }}%
+          </span>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <button
+          class="w-full bg-pink-500 text-white px-6 py-4 rounded-xl font-medium shadow-md hover:bg-pink-600 transition-colors transform hover:scale-105 cursor-pointer"
+          @click="startStudy"
+        >
+          开始学习
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -75,7 +90,6 @@ const lessonId = parseInt(props.lessonId)
 const audio = useAudio()
 
 
-
 const allWords = computed(() => vocabularyStore.testPaper?.list || [])
 const wrongWords = computed(() => allWords.value.filter(word => word.is_wrong))
 
@@ -83,11 +97,6 @@ const displayWords = computed(() => {
   return activeTab.value === 'all' ? allWords : wrongWords
 })
 
-
-const startFromWord = () => {
-  // Implementation for starting from specific word
-  console.log('Start from specific word')
-}
 
 const startStudy = () => {
   router.push(`/study/${unitId}/${lessonId}`)

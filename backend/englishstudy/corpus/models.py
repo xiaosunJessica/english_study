@@ -17,13 +17,15 @@ class Lesson(models.Model):
         (1, '未练习'),
         (2, '已练习'),
     )
+    @property
+    def error_count(self):
+        return self.words.filter(is_wrong=2).count()
     unit = models.ForeignKey(Unit, related_name='lessons', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)  # 如 "Test Paper 1"
     is_checked = models.CharField(max_length=10, default="2")
     extra = models.CharField(max_length=100, blank=True)
     url = models.URLField()
     word_count = models.IntegerField()  # 如 "共112个单词"
-    error_count = models.IntegerField() # 如 "错5个单词"
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=1)
 
     def __str__(self):

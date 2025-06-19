@@ -1,25 +1,5 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-100 via-blue-200 to-blue-300 p-5 max-w-3xl mx-auto">
-    <header
-      class="bg-white bg-opacity-90 rounded-2xl p-4 mb-6 backdrop-blur-md"
-    >
-      <div class="flex justify-between items-center">
-        <span class="text-lg font-bold text-gray-800">听写 (1/112)</span>
-        <div class="flex gap-2">
-          <button
-            class="bg-white bg-opacity-80 border border-gray-300 rounded-full px-4 py-2 text-sm cursor-pointer transition duration-200 hover:bg-white"
-          >
-            对答案
-          </button>
-          <button
-            class="bg-white bg-opacity-80 border border-gray-300 rounded-full px-4 py-2 text-sm cursor-pointer transition duration-200 hover:bg-white"
-          >
-            巩固错词
-          </button>
-        </div>
-      </div>
-    </header>
-
     <section
       class="bg-gradient-to-br from-pink-600 to-pink-400 rounded-2xl p-6 mb-6"
     >

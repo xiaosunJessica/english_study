@@ -1,4 +1,4 @@
-# *_* coding: utf-8 *_* 
+# *_* coding: utf-8 *_*
 # @Time: 2025/6/7 17:41
 # @Author: JessicaSun
 # @File: serializers
@@ -34,7 +34,6 @@ class LessonSerializer(serializers.ModelSerializer):
 
 class LessonDetailSerializer(serializers.ModelSerializer):
     list = serializers.SerializerMethodField()
-
     class Meta:
         model = Lesson
         fields = ['name', 'url', 'word_count', 'error_count', 'extra', 'list', 'status']

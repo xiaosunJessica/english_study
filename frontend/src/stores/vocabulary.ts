@@ -9,7 +9,7 @@ export interface Word {
   url: string;
   local_url: string;
   word_id: string;
-  error_num: string;
+  error_num: number;
   lesson_id: number;
   is_wrong: boolean;
   wrong_num: number;
@@ -27,8 +27,8 @@ export interface TestPaper {
   id: string,
   name: string;
   url: string;
-  word_count: string;
-  error_count: string;
+  word_count: number;
+  error_count: number;
   extra: string;
   more: string;
   list: Word[];
