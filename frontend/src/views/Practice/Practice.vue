@@ -47,19 +47,66 @@
           class="flex justify-center items-center gap-6 px-6 py-4"
         >
 
-        <button
+        <!-- <button
           type="button"
           class="p-4 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors active:scale-95"
           title="调整播放速度"
         >
           <Volume2 :size="24" class="text-gray-600" />
-        </button>
-        <button
+        </button> -->
+        <div class="relative">
+          <button
+            @click="showSpeedMenu = !showSpeedMenu"
+            :class="[
+              'px-4 py-2 rounded-lg font-medium transition-all duration-200',
+              showSpeedMenu
+                ? 'bg-pink-500 text-white shadow-lg'
+                : 'bg-pink-100 text-pink-600 hover:bg-pink-200'
+            ]"
+          >
+            {{ currentSpeed }}x倍速
+          </button>
+
+          <!-- Speed Menu -->
+          <Transition
+            enter-active-class="transition ease-out duration-200"
+            enter-from-class="opacity-0 scale-95"
+            enter-to-class="opacity-100 scale-100"
+            leave-active-class="transition ease-in duration-150"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-95"
+          >
+            <div
+              v-if="showSpeedMenu"
+              class="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-white rounded-xl shadow-2xl border border-gray-100 p-2 min-w-[200px] z-10"
+            >
+              <div class="text-xs text-gray-500 px-3 py-2 border-b border-gray-100 mb-1">
+                选择播放速度
+              </div>
+              <div class="grid grid-cols-3 gap-1">
+                <button
+                  v-for="speed in speedOptions"
+                  :key="speed"
+                  @click="handleSpeedChange(speed)"
+                  :class="[
+                    'px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                    currentSpeed === speed
+                      ? 'bg-pink-500 text-white shadow-md transform scale-105'
+                      : 'hover:bg-gray-100 text-gray-700'
+                  ]"
+                >
+                  {{ speed }}x
+                </button>
+              </div>
+            </div>
+          </Transition>
+        </div>
+        <!-- <button
           class="p-0 rounded-full bg-white/90 border-none py-2 px-5 text-sm cursor-pointer backdrop-blur-md hover:shadow-md transition-transform duration-200 ease-in-out"
           @click="toggleSpeed"
         >
           🔄 {{ currentSpeed }}倍速
-        </button>
+        </button> -->
 
         <button
           type="button"
@@ -194,19 +241,19 @@ const words = computed <Word[]>(() => vocabularyStore.testPaper?.list || [])
 const totalWords = computed<number>(() => Number(vocabularyStore.testPaper?.word_count) || 0)
 const currentWord = computed(() => words.value[currentIndex.value])
 
-const speeds = [1.0, 1.2, 1.4, 1.6]
+const speedOptions = [1.0, 1.2, 1.4, 1.6]
+
+const showSpeedMenu = ref(false)
 
 // 记录错误结果
 const vocabularyErrorMap = ref(new Map<string, string>())
 
-
-const toggleSpeed = () => {
-  const currentSpeedIndex = speeds.indexOf(currentSpeed.value)
-  const nextIndex = (currentSpeedIndex + 1) % speeds.length
-  currentSpeed.value = speeds[nextIndex]
+// Methods
+const handleSpeedChange = (speed: number) => {
+  currentSpeed.value = speed
+  showSpeedMenu.value = false
   audio.changePlaybackRate(currentSpeed.value)
 }
-
 
 
 const togglePlay = () => {
