@@ -1,80 +1,74 @@
 import os
 import django
 import requests
+from urllib.parse import urlparse, parse_qs
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'englishstudy.settings')  # 替换为你的项目名
+# Django 环境设置
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'englishstudy.settings')
 django.setup()
 
-from corpus.models import Book, Unit, TestDetail, Word
+from corpus.models import Unit, Lesson, Word
 
-# 1. 抓取 fullList
-full_list_url = "https://v.xueweigui.com/ApicorpusFly/fullList"
-resp = requests.get(full_list_url)
-resp.encoding = 'utf-8'
-data = resp.json()["data"]
+urls = [
+    'https://v.xueweigui.com/ApicorpusFly/fullItem?anchor=all&name=Test%20Paper%201&book_id=10006&unit_id=4&lesson_id=10026',
+    'https://v.xueweigui.com/ApicorpusFly/fullItem?anchor=all&name=Test%20Paper%201&book_id=10006&unit_id=4&lesson_id=10027',
+    'https://v.xueweigui.com/ApicorpusFly/fullItem?anchor=all&name=Test%20Paper%201&book_id=10006&unit_id=4&lesson_id=10028',
+    'https://v.xueweigui.com/ApicorpusFly/fullItem?anchor=all&name=Test%20Paper%201&book_id=10006&unit_id=4&lesson_id=10029'
+]
 
-for chapter_itm in data:
-    if not chapter_itm.get("name"):
-        continue
-    # 写入 corpus
-    chapter, _ = Book.objects.get_or_create(
-        name=chapter_itm["name"],
-        defaults={
-            "style": chapter_itm.get("style", "2"),
-            "is_selected": int(chapter_itm.get("is_selected", "0") or 0)
-        }
-    )
-    for paper in chapter_itm.get("list", []):
-        # 写入 Test
-        test, _ = Unit.objects.get_or_create(
-            chapter=chapter,
-            name=paper["name"],
-            defaults={
-                "is_checked": int(paper.get("is_checked", "0") or 0),
-                "extra": paper.get("extra", ""),
-                "url": paper.get("url", ""),
-                "word_count": paper.get("word_count", "")
+session = requests.Session()
+
+for url in urls:
+    try:
+        # 解析 unit_id 与 lesson_id
+        qs = parse_qs(urlparse(url).query)
+        unit_id  = int(qs.get('unit_id',   [0])[0])
+
+        if not unit_id:
+            print(f'URL 缺少必要参数：{url}')
+            continue
+
+        # 请求数据
+        resp = session.get(url, timeout=15)
+        resp.raise_for_status()
+        data_node = resp.json().get('data')
+        if not data_node:
+            print(f'API 无有效数据：{url}')
+            continue
+        lesson_data = data_node[0]
+
+        # 确保 Unit 存在
+        unit, _ = Unit.objects.get_or_create(
+            id=unit_id,
+            defaults={'title': f'Unit {unit_id}'}
+        )
+
+        # ★ 关键：用 lesson_id 作为主键写入 Lesson
+        lesson, _ = Lesson.objects.get_or_create(
+            unit=unit,  # 这里传的是 Unit 对象
+            url=url,  # 查找条件之一
+            defaults={  # 新建时赋的默认字段
+                'name': lesson_data.get('text', 'No title'),
+                'word_count': int(lesson_data.get('word_count', 0)),
             }
         )
-        # 2. 抓取 test 的 url，写入 TestDetail 和 Word
-        test_url = paper.get("url")
-        if not test_url:
-            continue
-        try:
-            test_resp = requests.get(test_url)
-            test_resp.encoding = 'utf-8'
-            test_data = test_resp.json()
-            for detail in test_data.get("data", []):
-                # 写入 TestDetail
-                test_detail, _ = TestDetail.objects.get_or_create(
-                    test=test,
-                    text=detail.get("text", ""),
-                    defaults={
-                        "count": int(detail.get("count", 0) or 0),
-                        "unit_id": int(detail.get("unit_id", 0) or 0),
-                        "product_type": int(detail.get("product_type", 0) or 0),
-                        "url": detail.get("url", ""),
-                        "check_url": detail.get("check_url", ""),
-                        "lesson_id": int(detail.get("lesson_id", 0) or 0),
-                        "is_selected": int(detail.get("is_selected", 0) or 0)
-                    }
-                )
-                for word in detail.get("list", []):
-                    # 写入 Word
-                    Word.objects.get_or_create(
-                        test_detail=test_detail,
-                        text=word.get("text", ""),
-                        defaults={
-                            "note": word.get("note", ""),
-                            "voice": word.get("voice", ""),
-                            "url": word.get("url", ""),
-                            "local_url": word.get("local_url", ""),
-                            "id": word.get("id", ""),
-                            "error_num": word.get("error_num", ""),
-                            "lesson_id": int(word.get("lesson_id", 0) or 0)
-                        }
-                    )
-        except Exception as e:
-            print(f"抓取 {test_url} 失败: {e}")
 
-print("所有 testdetail 和 words 数据已写入数据库。")
+        # 写入 Word：同一个 (lesson, text) 只留一条
+        for w in lesson_data.get('list', []):
+            Word.objects.update_or_create(
+                lesson=lesson,
+                text=w.get('text', ''),
+                defaults={
+                    'note':      w.get('note', ''),
+                    'voice':     w.get('voice', ''),
+                    'url':       w.get('url', ''),
+                    'local_url': w.get('local_url', ''),
+                    'error_num': w.get('error_num', ''),
+                }
+            )
+        print(f'✅ 完成：lesson ')
+
+    except Exception as e:
+        print(f'❌ 处理 {url} 时出错：{e}')
+
+print('全部写入完成')
