@@ -1,29 +1,35 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Chapter from '../views/Chapter/Chaper.vue'
-import WordList from '../views/WordList.vue'
-import StudyMode from '../views/StudyMode.vue'
-import Practice from '../views/Practice/Practice.vue'
+import Home from '@/views/Home.vue'
+import Chapter from '../views/Corpus/Chapter/Chaper.vue'
+import WordList from '../views/Corpus/WordList.vue'
+// import StudyMode from '../views/Corpus/StudyMode.vue'
+import Practice from '../views/Corpus/Practice/Practice.vue'
 
 const routes = [
   {
     path: '/',
+    name: 'home',
+    component: Home
+  },
+  {
+    path: '/corpus/chapter',
     name: 'Chapter',
     component: Chapter
   },
   {
-    path: '/wordlist/:unitId/:lessonId',
+    path: '/corpus/wordlist/:unitId/:lessonId',
     name: 'WordList',
     component: WordList,
     props: true
   },
+  // {
+  //   path: '/corpus/study/:unitId/:lessonId',
+  //   name: 'StudyMode',
+  //   component: StudyMode,
+  //   props: true
+  // },
   {
-    path: '/study/:unitId/:lessonId',
-    name: 'StudyMode',
-    component: StudyMode,
-    props: true
-  },
-  {
-    path: '/practice/:unitId/:lessonId/:mode',
+    path: '/corpus/practice/:unitId/:lessonId/:tabId',
     name: 'Practice',
     component: Practice,
     props: true

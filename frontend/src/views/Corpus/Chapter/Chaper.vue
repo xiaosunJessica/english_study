@@ -24,7 +24,7 @@ const vocabularyStore = useVocabularyStore()
 const { chapters, setChapters } = vocabularyStore
 
 const goToWordList = (chapterId: string, paperId: string) => {
-  router.push(`/wordlist/${chapterId}/${paperId}`)
+  router.push(`/corpus/wordlist/${chapterId}/${paperId}`)
 }
 
 onMounted(async () => {

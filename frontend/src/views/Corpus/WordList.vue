@@ -69,9 +69,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useVocabularyStore } from '../stores/vocabulary'
-import { getCorpusItem } from '../api/corpus'
-import { useAudio } from '../hooks/useAudio'
+import { useVocabularyStore } from '../../stores/vocabulary'
+import { getCorpusItem } from '../../api/corpus'
+import { useAudio } from '../../hooks/useAudio'
 
 interface Props {
   unitId: string
@@ -100,7 +100,7 @@ const displayWords = computed(() => {
 
 
 const startStudy = () => {
-  router.push(`/study/${unitId}/${lessonId}`)
+  router.push(`/corpus/practice/${unitId}/${lessonId}/${activeTab.value}`)
 }
 
 const onPlay = (url: string) => {

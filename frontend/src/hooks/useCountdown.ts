@@ -1,5 +1,11 @@
 import { ref } from 'vue'
-
+export interface Countdown {
+  timeLeft: number
+  isActive: boolean
+  start: Function
+  stop: Function
+  reset: Function
+}
 export const useCountdown = (seconds: number, onComplete?: () => void) => {
   const timeLeft = ref(seconds)
   const isActive = ref(false)
@@ -9,7 +15,7 @@ export const useCountdown = (seconds: number, onComplete?: () => void) => {
     if (isActive.value) return
     isActive.value = true
     timer.value = setInterval(() => {
-      if (timeLeft.value <= 0) {
+      if (timeLeft.value <= 1) {
         stop()
         onComplete?.()
       } else {
